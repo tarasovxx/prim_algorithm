@@ -1,0 +1,4 @@
+/Users/alfa/CLionProjects/prim_seminar/cmake-build-debug/CMakeFiles/prim_seminar.dir
+/Users/alfa/CLionProjects/prim_seminar/cmake-build-debug/CMakeFiles/prim_seminar_parallel.dir
+/Users/alfa/CLionProjects/prim_seminar/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/alfa/CLionProjects/prim_seminar/cmake-build-debug/CMakeFiles/rebuild_cache.dir
