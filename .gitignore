@@ -2,6 +2,7 @@
 *.d
 
 cmake-build-debug
+cmake-build-release
 .idea
 
 # Object files
