@@ -1,19 +1,16 @@
-// C Program to Implement Prim's Algorithm
-
-#include <limits.h>
-#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <limits.h>
+#include <time.h>
 
-// Define Number of vertices in the graph
-#define V 5
+// Функция для поиска вершины с минимальным "весом" (ключом) среди непосещённых
+int minweight(int *weight, bool *visited, int n) {
+    int min = INT_MAX;
+    int min_index = -1;
 
-// Function to find the vertex with the minimum weight
-int minweight(int weight[], bool visited[])
-{
-    int min = INT_MAX, min_index;
-
-    for (int v = 0; v < V; v++) {
-        if (visited[v] == false && weight[v] < min) {
+    for (int v = 0; v < n; v++) {
+        if (!visited[v] && weight[v] < min) {
             min = weight[v];
             min_index = v;
         }
@@ -21,84 +18,121 @@ int minweight(int weight[], bool visited[])
     return min_index;
 }
 
-// Function to print the constructed MST and its total cost
-void printMST(int parent[], int graph[V][V])
-{
+// Функция для печати результата (рёбра MST и их суммарная стоимость)
+void printMST(int *parent, int **graph, int n) {
     int totalCost = 0;
-
-    printf("MST for the graph:\n");
-    printf("Edge \tWeight\n");
-    for (int i = 1; i < V; i++) {
-        printf("%d - %d \t%d \n", parent[i], i,
-               graph[i][parent[i]]);
+    printf("\nMST for the generated graph:\n");
+    printf("Edge   Weight\n");
+    for (int i = 1; i < n; i++) {
+        printf("%d - %d    %d\n", parent[i], i, graph[i][parent[i]]);
         totalCost += graph[i][parent[i]];
     }
     printf("Total cost of MST: %d\n", totalCost);
 }
 
-// Function to construct and print MST for a graph
-// represented using adjacency matrix representation
-void primMST(int graph[V][V])
-{
-    // Array to store constructed MST
-    int parent[V];
-    // Array to store the weights
-    int weight[V];
-    // To represent set of vertices included in MST
-    bool visited[V];
+// Функция построения MST алгоритмом Прима (на последовательном коде)
+void primMST(int **graph, int n) {
+    // Массив для хранения MST
+    int *parent = (int *)malloc(n * sizeof(int));
+    // "Веса" (или ключи), используемые для выбора минимального ребра
+    int *weight = (int *)malloc(n * sizeof(int));
+    // Массив, отмечающий, включена ли вершина в MST
+    bool *visited = (bool *)malloc(n * sizeof(bool));
 
-    // Initialize all weights as INFINITE
-    for (int i = 0; i < V; i++) {
+    // Инициализация
+    for (int i = 0; i < n; i++) {
         weight[i] = INT_MAX;
         visited[i] = false;
     }
 
-    // Always include the first 1st vertex in MST.
-    weight[0] = 0;
-    parent[0] = -1;
+    // Всегда включаем вершину 0 первой (можно любую другую)
+    weight[0] = 0;   // чтобы выбрать её первой
+    parent[0] = -1;  // у корневой вершины нет родителя
 
-    // The MST will have V vertices
-    for (int count = 0; count < V - 1; count++) {
-        // Pick the minimum weight vertex from the set of
-        // vertices not yet included in MST
-        int u = minweight(weight, visited);
-
-        // Add the picked vertex to the MST Set
+    // На каждом шаге добавляем по одной вершине в MST (всего n-1 добавлений)
+    for (int count = 0; count < n - 1; count++) {
+        // 1. Выбираем непосещённую вершину с минимальным значением weight[]
+        int u = minweight(weight, visited, n);
+        // 2. Помечаем её как посещённую
         visited[u] = true;
 
-        // Consider only those vertices which are not yet
-        // included in MST
-        for (int v = 0; v < V; v++) {
-            if (graph[u][v] && visited[v] == false
-                && graph[u][v] < weight[v]) {
+        // 3. Обновляем weight[] и parent[] для смежных вершин, 
+        //    которые ещё не в MST
+        for (int v = 0; v < n; v++) {
+            // Если есть ребро (u,v), и v не посещён, и вес (u,v) меньше текущего weight[v]
+            // то обновляем
+            if (graph[u][v] != 0 && !visited[v] && graph[u][v] < weight[v]) {
                 parent[v] = u;
                 weight[v] = graph[u][v];
             }
         }
     }
 
-    // Print the constructed MST and its total cost
-    printMST(parent, graph);
+    // Печатаем результат
+    printMST(parent, graph, n);
+
+    // Освобождаем ресурсы
+    free(parent);
+    free(weight);
+    free(visited);
 }
 
-int main()
-{
-    /* Let us create the following graph
-        2    3
-    (0)--(1)--(2)
-    |   / \   |
-    6| 8/   \5 |7
-    | /     \ |
-    (3)-------(4)
-          9          */
-    int graph[V][V] = { { 0, 2, 0, 6, 0 },
-                        { 2, 0, 3, 8, 5 },
-                        { 0, 3, 0, 0, 7 },
-                        { 6, 8, 0, 0, 9 },
-                        { 0, 5, 7, 9, 0 } };
+// Функция генерации псевдослучайного неориентированного взвешенного графа
+// (матрица смежности). Веса от 1 до 100, диагональ = 0.
+int **generateGraph(int n) {
+    // Выделяем память под матрицу смежности
+    int **graph = (int **)malloc(n * sizeof(int *));
+    for (int i = 0; i < n; i++) {
+        graph[i] = (int *)malloc(n * sizeof(int));
+    }
 
-    // Print the MST
-    primMST(graph);
+    srand((unsigned)time(NULL));
+
+    // Заполняем матрицу
+    for (int i = 0; i < n; i++) {
+        for (int j = i; j < n; j++) {
+            if (i == j) {
+                graph[i][j] = 0;
+            } else {
+                int w = rand() % 100 + 1; // случайный вес 1..100
+                graph[i][j] = w;
+                graph[j][i] = w; // симметрично, т.к. граф неориентированный
+            }
+        }
+    }
+    return graph;
+}
+
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        printf("Usage: %s <num_vertices>\n", argv[0]);
+        return 1;
+    }
+
+    int n = atoi(argv[1]); // число вершин
+
+    // Генерируем граф
+    int **graph = generateGraph(n);
+
+    // Замер времени начала
+    clock_t start = clock();
+
+    // Запускаем алгоритм Прима
+    primMST(graph, n);
+
+    // Замер времени окончания
+    clock_t end = clock();
+
+    // Выводим затраченное время
+    double total_time = (double)(end - start) / CLOCKS_PER_SEC;
+    printf("\nNumber of vertices: %d\n", n);
+    printf("Time taken by Prim's algorithm: %.6f seconds\n", total_time);
+
+    // Освобождаем память под матрицу
+    for (int i = 0; i < n; i++) {
+        free(graph[i]);
+    }
+    free(graph);
 
     return 0;
 }
