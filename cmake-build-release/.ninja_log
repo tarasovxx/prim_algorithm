@@ -1,0 +1,5 @@
+# ninja log v6
+2	245	1736971696845980051	CMakeFiles/prim_seminar_omp.dir/openmp_native/prim_parallel_openmp.c.o	6a1d2985529f67a0
+245	401	1736971697088872337	prim_seminar_omp	25a22e452d709d78
+1	295	1736972818408051386	CMakeFiles/prim_seminar_parallel.dir/prim_parallel_mpi.c.o	8dec4b00b8b47157
+296	402	1736972818702803735	prim_seminar_parallel	fb873ab6cb9a11ee
